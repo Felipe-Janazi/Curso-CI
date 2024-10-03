@@ -36,9 +36,17 @@ jobs:
       run: |
           DOCKER_COMPOSE_VERSION=2.20.2
           sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +wrx /usr/local/bin/docker-compose
-          docker-compose --version  # Verifica a versão do Docker Compose para garantir que a instalação foi bem-sucedida.
+          
+          # Verifica se o download foi bem-sucedido
+          if [ -f /usr/local/bin/docker-compose ]; then
+            echo "Docker Compose downloaded successfully."
+          else
+            echo "Failed to download Docker Compose."
+            exit 1
+          fi
 
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
     - name: Build-DB
       run: docker-compose build
 
