@@ -1,6 +1,3 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: Go
 
 on:
@@ -10,55 +7,57 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.20'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
 
-    - name: Install Docker
-      run: |
+      - name: Install Docker
+        run: |
           sudo apt-get update
           sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
           echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
           sudo apt-get update
           sudo apt-get install -y docker-ce docker-ce-cli containerd.io
           sudo systemctl start docker
           sudo systemctl enable docker
 
-    - name: Install Docker Compose
-      run: |
-          sudo DOCKER_COMPOSE_VERSION=2.20.2
+      - name: Install Docker Compose
+        run: |
+          DOCKER_COMPOSE_VERSION=2.20.2
           sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version  # Verifica a versão do Docker Compose para garantir que a instalação foi bem-sucedida.
 
-    - name: Build-DB
-      run: docker-compose build
+      - name: Build-DB
+        run: docker-compose build
 
-    - name: Create DB
-      run: docker-compose up -d 
+      - name: Create DB
+        run: docker-compose up -d 
 
-    - name: Test
-      run: go test -v projeto-go-testes-main/main_test.go
+      - name: Test
+        run: go test -v ./projeto-go-testes-main/main_test.go  # Verifique se o caminho está correto
+
+      - name: Stop and Remove Containers
+        if: always()  # Sempre execute esta etapa, mesmo se as anteriores falharem
+        run: docker-compose down
 
   build: 
     needs: test
-    
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.20'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
         
-    - name: Build
-      run: go build -v projeto-go-testes-main/main.go
+      - name: Build
+        run: go build -v ./projeto-go-testes-main/main.go  # Verifique se o caminho está correto
