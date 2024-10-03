@@ -34,9 +34,10 @@ jobs:
 
     - name: Install Docker Compose
       run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          DOCKER_COMPOSE_VERSION=2.20.2
+          sudo curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
-
+          docker-compose --version  # Verifica a versão do Docker Compose para garantir que a instalação foi bem-sucedida.
 
     - name: Build-DB
       run: docker-compose build
