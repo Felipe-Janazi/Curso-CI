@@ -1,5 +1,3 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
 name: Go
 
@@ -21,18 +19,31 @@ jobs:
       with:
         go-version: '1.20'
 
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
     - name: Build-DB
-      run: sudo docker-compose build
+      run: docker-compose build
 
     - name: Create DB
-      run: sudo docker-compose up -d 
+      run: docker-compose up -d --verbose
 
     - name: Test
-      run: go test -v projeto-go-testes-main/main_test.go
+      run: go test -v ./...
+
+    - name: Stop and remove containers
+      if: always()
+      run: docker-compose down
 
   build: 
     needs: test
-    
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
